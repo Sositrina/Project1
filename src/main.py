@@ -1,25 +1,43 @@
-import pandas as pd
+import logging
+import os
 
-from src.views import greetings_on_time
+from pandas import DataFrame
+
+from src.services import profitable_cashback_categories
+from src.utils import reading_a_file
+
+# Настройка логгера
+log_path = os.path.join(os.path.dirname(__file__), "..", "logs", "example.log")
+os.makedirs(os.path.dirname(log_path), exist_ok=True)
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s %(levelname)s: %(message)s",
+    handlers=[
+        logging.FileHandler(log_path, encoding="utf-8", delay=False),
+    ],
+)
 
 
-def get_period_from_file() -> str:
-    """Берет последнюю дату из файла и возвращает период с начала месяца по эту дату"""
-    df = pd.read_excel("../data/operations.xlsx", sheet_name="Отчет по операциям")
-    df["Дата операции"] = pd.to_datetime(df["Дата операции"], dayfirst=True)
-
-    # Берет максимальную дату из файла
-    max_date = df["Дата операции"].max()
-
-    # Возвращает максимальную дату как строку для функции
-    result: str = max_date.strftime("%Y-%m-%d %H:%M:%S")
-    return result
+def main()-> None:
+    df: DataFrame = reading_a_file()
+    result1 = profitable_cashback_categories(df, "2021", "03")
+    return result1
 
 
 if __name__ == "__main__":
-    # Получает дату для формирования периода
-    file_date = get_period_from_file()
+    main()
 
-    # Передает эту дату в функцию
-    result = greetings_on_time(file_date)
-    print(result)
+
+def main():
+    # Чтение данных
+    df = reading_a_file()
+
+    # Анализ разных периодов
+    print("Анализ кешбэка за март 2021:")
+    result1 = profitable_cashback_categories(df, "2021", "03")
+    print(result1)
+
+
+if __name__ == "__main__":
+    main()
